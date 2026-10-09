@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - binary-cache-local-test
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
