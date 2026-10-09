@@ -1,8 +1,12 @@
 # JitPack build: https://jitpack.io/#scheibling/terraform-spring-boot
 # Sets every module's version to the requested JitPack version (tag, commit or <branch>-SNAPSHOT)
 # and skips signing, which needs the release GPG key.
+# Maven is installed through SDKMAN because the mvn in JitPack's build image fails to start
+# ("Could not find or load main class org.codehaus.plexus.classworlds.launcher.Launcher").
 jdk:
   - openjdk21
 install:
+  - sdk install maven 3.9.9
+  - sdk use maven 3.9.9
   - mvn -B versions:set-property -Dproperty=revision -DnewVersion=$VERSION -DgenerateBackupPoms=false
   - mvn -B install -DskipTests -Dgpg.skip -pl terraform-client,terraform-spring-boot-autoconfigure,terraform-spring-boot-starter
