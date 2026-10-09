@@ -1,0 +1,38 @@
+name: Publish package to GitHub Packages
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish (a -SNAPSHOT version can be published again, a release version only once)
+        required: true
+        default: 1.7.1-binary-cache-SNAPSHOT
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      # setup-java writes a settings.xml with a "github" server that authenticates with
+      # GITHUB_ACTOR / GITHUB_TOKEN.
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          server-id: github
+      - name: Update POM Version
+        run: mvn -B versions:set-property -Dproperty=revision -DnewVersion=$VERSION -DgenerateBackupPoms=false
+      # The deploy goal is called directly: the deploy phase is taken over by
+      # central-publishing-maven-plugin, which publishes to Maven Central.
+      - name: Publish to GitHub Packages
+        run: >
+          mvn -B install org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy
+          -Dgpg.skip
+          -pl terraform-client,terraform-spring-boot-autoconfigure,terraform-spring-boot-starter
+          -DaltDeploymentRepository=github::https://maven.pkg.github.com/${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
