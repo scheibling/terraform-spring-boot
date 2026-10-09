@@ -1,5 +1,9 @@
 name: Publish package to GitHub Packages
 on:
+  push:
+    branches:
+      - master
+      - binary-cache-local-test
   workflow_dispatch:
     inputs:
       version:
@@ -10,7 +14,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      VERSION: ${{ inputs.version }}
+      VERSION: 1.7.1-binary-cache-SNAPSHOT
     permissions:
       contents: read
       packages: write
